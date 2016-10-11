@@ -11,6 +11,7 @@ print(cuda)
 -- Set up Torch
 print('Setting up')
 torch.setheaptracking(true)
+cutorch.setDevice(3)
 torch.setdefaulttensortype('torch.FloatTensor')
 torch.manualSeed(1)
 if cuda then
