@@ -37,6 +37,7 @@ cmd:option('-learningRate', 0.001, 'Learning rate')
 cmd:option('-dataPath', '/Users/art/datasets/materials_textures/materials_textures/fmd/images_cropped_256/')
 cmd:option('-optimiser', 'adam', 'Optimiser')
 cmd:option('-epochs', 10, 'Training epochs')
+cmd:option('-nOfHiddenUnits', 100)
 local opt = cmd:parse(arg)
 opt.batchSize = 50 -- Currently only set up for divisors of N
 
@@ -51,7 +52,7 @@ end
 
 -- Create model
 local Model = require ('models/' .. opt.model)
-Model:createAutoencoder(XTrain)
+Model:createAutoencoder(XTrain, opt.nOfHiddenUnits)
 local autoencoder = Model.autoencoder
 if cuda then
   autoencoder:cuda()
