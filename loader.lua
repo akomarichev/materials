@@ -1,8 +1,6 @@
 require 'torch'
 require 'image'
 
-local pwd = '/Users/art/datasets/materials_textures/materials_textures/fmd/images_cropped_256/'
-
 local classes = {'fabric', 'foliage', 'glass', 'leather', 'metal', 'paper', 'plastic', 'stone', 'water', 'wood'}
 local type = {'moderate', 'object'}
 
@@ -35,7 +33,7 @@ end
 
 local loader = {}
 
-function loader:load_fmd()
+function loader:load_fmd(pwd)
   all_images = torch.Tensor(1000,3,256,256)
   grayscale_images = torch.Tensor(1000,256,256)
 
