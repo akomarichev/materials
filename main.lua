@@ -11,7 +11,6 @@ print(cuda)
 -- Set up Torch
 print('Setting up')
 torch.setheaptracking(true)
-cutorch.setDevice(3)
 torch.setdefaulttensortype('torch.FloatTensor')
 torch.manualSeed(1)
 if cuda then
@@ -56,7 +55,10 @@ local Model = require ('models/' .. opt.model)
 Model:createAutoencoder(XTrain, opt.nOfHiddenUnits)
 local autoencoder = Model.autoencoder
 if cuda then
-  autoencoder:cuda()
+  --model:cuda()
+  print('Number of GPUs: ' .. cutorch.getDeviceCount())
+  gpus = torch.range(1, cutorch.getDeviceCount()):totable()
+  autoencoder = nn.DataParallelTable(1):add(autoencoder, gpus):cuda()
   -- Use cuDNN if available
   if hasCudnn then
     cudnn.convert(autoencoder, cudnn)
@@ -64,6 +66,7 @@ if cuda then
 end
 
 print("done 2!")
+print(autoencoder)
 
 -- Create adversary (if needed)
 -- local adversary
@@ -91,7 +94,8 @@ print("Number of parameters: " .. theta:size(1))
 -- Create loss
 local criterion = nn.BCECriterion()
 if cuda then
-  criterion:cuda()
+  --criterion:cuda()
+  criterion = nn.DataParallelTable(1):add(criterion, gpus):cuda()
 end
 
 -- Create optimiser function evaluation
