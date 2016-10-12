@@ -8,6 +8,9 @@ local hasCudnn, cudnn = pcall(require, 'cudnn') -- Use cuDNN if available
 
 print(cuda)
 
+print('Number of GPUs: ' .. cutorch.getDeviceCount())
+gpus = torch.range(1, cutorch.getDeviceCount()):totable()
+
 -- Set up Torch
 print('Setting up')
 torch.setheaptracking(true)
@@ -47,7 +50,8 @@ local XTrain = loader:load_fmd(opt.dataPath):float():div(255)
 local N = XTrain:size(1)
 print(XTrain:size())
 if cuda then
-  XTrain = XTrain:cuda()
+  -- XTrain = XTrain:cuda()
+  XTrain = nn.DataParallelTable(1):add(XTrain, gpus):cuda()
 end
 
 -- Create model
@@ -55,9 +59,7 @@ local Model = require ('models/' .. opt.model)
 Model:createAutoencoder(XTrain, opt.nOfHiddenUnits)
 local autoencoder = Model.autoencoder
 if cuda then
-  --model:cuda()
-  print('Number of GPUs: ' .. cutorch.getDeviceCount())
-  gpus = torch.range(1, cutorch.getDeviceCount()):totable()
+  --autoencoder:cuda()
   autoencoder = nn.DataParallelTable(1):add(autoencoder, gpus):cuda()
   -- Use cuDNN if available
   if hasCudnn then
