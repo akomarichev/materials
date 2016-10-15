@@ -5,11 +5,14 @@ local gnuplot = require 'gnuplot'
 local image = require 'image'
 local cuda = pcall(require, 'cutorch') -- Use CUDA if available
 local hasCudnn, cudnn = pcall(require, 'cudnn') -- Use cuDNN if available
+local path = require 'paths'
 
 print(cuda)
 
-print('Number of GPUs: ' .. cutorch.getDeviceCount())
-gpus = torch.range(1, cutorch.getDeviceCount()):totable()
+-- if cuda then
+--   print('Number of GPUs: ' .. cutorch.getDeviceCount())
+--   gpus = torch.range(1, cutorch.getDeviceCount()):totable()
+-- end
 
 -- Set up Torch
 print('Setting up')
@@ -50,8 +53,8 @@ local XTrain = loader:load_fmd(opt.dataPath):float():div(255)
 local N = XTrain:size(1)
 print(XTrain:size())
 if cuda then
-  -- XTrain = XTrain:cuda()
-  XTrain = nn.DataParallelTable(1):add(XTrain, gpus):cuda()
+  XTrain = XTrain:cuda()
+  -- XTrain = nn.DataParallelTable(1):add(XTrain, gpus):cuda()
 end
 
 -- Create model
@@ -59,8 +62,8 @@ local Model = require ('models/' .. opt.model)
 Model:createAutoencoder(XTrain, opt.nOfHiddenUnits)
 local autoencoder = Model.autoencoder
 if cuda then
-  --autoencoder:cuda()
-  autoencoder = nn.DataParallelTable(1):add(autoencoder, gpus):cuda()
+  autoencoder:cuda()
+  --autoencoder = nn.DataParallelTable(1):add(autoencoder, gpus):cuda()
   -- Use cuDNN if available
   if hasCudnn then
     cudnn.convert(autoencoder, cudnn)
@@ -96,8 +99,8 @@ print("Number of parameters: " .. theta:size(1))
 -- Create loss
 local criterion = nn.BCECriterion()
 if cuda then
-  --criterion:cuda()
-  criterion = nn.DataParallelTable(1):add(criterion, gpus):cuda()
+  criterion:cuda()
+  --criterion = nn.DataParallelTable(1):add(simple_criterion, gpus):cuda()
 end
 
 -- Create optimiser function evaluation
@@ -210,6 +213,21 @@ for epoch = 1, opt.epochs do
   gnuplot.ylabel('Loss')
   gnuplot.xlabel('Batch #')
   gnuplot.plotflush()
+end
+
+
+-- saving model
+modelName = '/AE_model.net'
+filename = path.cwd() .. modelName
+
+if path.filep(filename) then
+  print("Model exists!")
+  model = torch.load(filename)
+  print(model)
+else
+  print("Model does not exist! Needs to be trained first.")
+  -- train()
+  torch.save(filename, model)
 end
 
 -- Test

@@ -20,6 +20,7 @@ function Model:createAutoencoder(X, nOfHiddenUnits)
   -- Create autoencoder
   self.autoencoder = nn.Sequential()
   self.autoencoder:add(self.encoder)
+  self.autoencoder:add(nn.L1Penalty(1e-2)) -- L1 penalty on activations
   self.autoencoder:add(self.decoder)
 end
 
