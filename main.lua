@@ -227,7 +227,7 @@ if path.filep(filename) then
 else
   print("Model does not exist! Needs to be trained first.")
   -- train()
-  torch.save(filename, model)
+  torch.save(filename, autoencoder)
 end
 
 -- Test
