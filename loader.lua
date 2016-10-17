@@ -48,7 +48,7 @@ function loader:load_fmd(filename)
 
   iter = 1
   for line in file:lines() do
-    grayscale_images[i] = rgb2gray(image.load(line))
+    grayscale_images[iter] = rgb2gray(image.load(line))
     iter = iter + 1
   end
 
