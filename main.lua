@@ -40,7 +40,7 @@ end
 local cmd = torch.CmdLine()
 cmd:option('-model', 'AE', 'Model: AE|SparseAE|DeepAE|ConvAE|UpconvAE|DenoisingAE|Seq2SeqAE|VAE|AdvAE')
 cmd:option('-learningRate', 0.001, 'Learning rate')
-cmd:option('-dataPath', '/Users/art/datasets/materials_textures/materials_textures/fmd/images_cropped_256/')
+cmd:option('-filePath', 'MINC_paths.txt')
 cmd:option('-optimiser', 'adam', 'Optimiser')
 cmd:option('-epochs', 10, 'Training epochs')
 cmd:option('-nOfHiddenUnits', 100)
@@ -49,7 +49,7 @@ opt.batchSize = 50 -- Currently only set up for divisors of N
 
 -- Load FMD dataset
 local loader = require "loader"
-local XTrain = loader:load_fmd(opt.dataPath):float():div(255)
+local XTrain = loader:load_fmd(opt.filePath):float()
 local N = XTrain:size(1)
 print(XTrain:size())
 if cuda then

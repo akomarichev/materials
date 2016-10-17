@@ -1,9 +1,6 @@
 require 'torch'
 require 'image'
 
-local classes = {'fabric', 'foliage', 'glass', 'leather', 'metal', 'paper', 'plastic', 'stone', 'water', 'wood'}
-local type = {'moderate', 'object'}
-
 -- convert rgb to grayscale by averaging channel intensities
 function rgb2gray(im)
 	-- Image.rgb2y uses a different weight mixture
@@ -15,9 +12,9 @@ function rgb2gray(im)
 	end
 
 	-- a cool application of tensor:select
-	local r = im:select(1, 1):csub(124)
-	local g = im:select(1, 2):csub(117)
-	local b = im:select(1, 3):csub(104)
+	local r = im:select(1, 1) --:csub(124/256)
+	local g = im:select(1, 2) --:csub(117/256)
+	local b = im:select(1, 3) --:csub(104/256)
 
 	local z = torch.Tensor(w, h):zero()
 
@@ -33,32 +30,34 @@ end
 
 local loader = {}
 
-function loader:load_fmd(pwd)
-  all_images = torch.Tensor(1000,3,256,256)
-  grayscale_images = torch.Tensor(1000,256,256)
+function loader:load_fmd(filename)
+  local path = "/opt/home/datasets/materials_textures/" .. filename
+
+  local nOfLines = 0
+  for _ in io.lines(path) do
+    nOfLines = nOfLines + 1
+  end
+
+  local file = io.open(path)
+
+  print("#ofLines: " .. nOfLines)
+
+  all_images = torch.Tensor(nOfLines,3,256,256)
+  grayscale_images = torch.Tensor(nOfLines,256,256)
 
   print (sys.COLORS.red .. '==> loading images')
 
   iter = 1
-  for i, name_class in ipairs(classes) do
-    if name_class == 'foliage' then
-      for k = 1,100 do
-        all_images[iter] = image.load(pwd .. name_class .. '/' .. name_class .. '_final_' .. string.format("%03d", k) .. '_new.jpg')
-        iter = iter + 1
-        -- print(iter)
-      end
-    else
-      for j, name_type in ipairs(type) do
-        for k = 1,50 do
-          -- path = pwd .. name_class .. '/' .. name_class .. '_' .. name_type .. '_' .. string.format("%03d", k) .. '_new.jpg'
-          -- print(path)
-          -- print(image.load(path):size())
-          all_images[iter] = image.load(pwd .. name_class .. '/' .. name_class .. '_' .. name_type .. '_' .. string.format("%03d", k) .. '_new.jpg')
-          -- print(iter)
-          iter = iter + 1
-        end
-      end
-    end
+  for line in file:lines() do
+    --print(iter .. ", " .. line)
+    --print(image.load(line):size())
+    all_images[iter] = image.load(line)
+    iter = iter + 1
+  end
+
+  for i = 1,3 do
+    print('Max color value: ' .. torch.max(all_images[{ {}, i, {}, {} }]))
+    print('Min color value: ' .. torch.min(all_images[{ {}, i, {}, {} }]))
   end
 
   -- convert rgb images to grayscale
@@ -66,10 +65,12 @@ function loader:load_fmd(pwd)
     grayscale_images[i] = rgb2gray(all_images[i])
   end
 
-  -- itorch.image(grayscale_images[100])
-  -- itorch.image(grayscale_images[300])
+  print('Max grayscale: ' .. torch.max(grayscale_images))
+  print('Min grayscale: ' .. torch.min(grayscale_images))
 
-  print('done!')
+  print('Max value: ' .. torch.max(all_images))
+
+  print(sys.COLORS.red .. 'Loaded!')
   return grayscale_images
 end
 
