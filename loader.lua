@@ -42,29 +42,14 @@ function loader:load_fmd(filename)
 
   print("#ofLines: " .. nOfLines)
 
-  all_images = torch.Tensor(nOfLines,3,256,256)
   grayscale_images = torch.Tensor(nOfLines,256,256)
 
   print (sys.COLORS.red .. '==> loading images')
 
   iter = 1
   for line in file:lines() do
-    --print(iter .. ", " .. line)
-    --print(image.load(line):size())
-    all_images[iter] = image.load(line)
-    print('Max color value: ' .. torch.max(all_images[iter]))
-    print('Min color value: ' .. torch.min(all_images[iter]))
+    grayscale_images[i] = rgb2gray(image.load(line))
     iter = iter + 1
-  end
-
-  for i = 1,3 do
-    print('Max color value: ' .. torch.max(all_images[{ {}, i, {}, {} }]))
-    print('Min color value: ' .. torch.min(all_images[{ {}, i, {}, {} }]))
-  end
-
-  -- convert rgb images to grayscale
-  for i = 1,nOfLines do
-    grayscale_images[i] = rgb2gray(all_images[i])
   end
 
   print('Max grayscale: ' .. torch.max(grayscale_images))
