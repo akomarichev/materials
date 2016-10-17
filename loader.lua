@@ -52,6 +52,8 @@ function loader:load_fmd(filename)
     --print(iter .. ", " .. line)
     --print(image.load(line):size())
     all_images[iter] = image.load(line)
+    print('Max color value: ' .. torch.max(all_images[iter]))
+    print('Min color value: ' .. torch.min(all_images[iter]))
     iter = iter + 1
   end
 

@@ -51,6 +51,7 @@ opt.batchSize = 50 -- Currently only set up for divisors of N
 local loader = require "loader"
 local XTrain = loader:load_fmd(opt.filePath):float()
 local N = XTrain:size(1)
+torch.save('gray_scale.dat', Xtrain)
 print(XTrain:size())
 if cuda then
   XTrain = XTrain:cuda()
