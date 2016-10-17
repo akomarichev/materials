@@ -63,7 +63,7 @@ function loader:load_fmd(filename)
   end
 
   -- convert rgb images to grayscale
-  for i = 1,1000 do
+  for i = 1,nOfLines do
     grayscale_images[i] = rgb2gray(all_images[i])
   end
 
