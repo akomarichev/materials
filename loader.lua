@@ -55,8 +55,6 @@ function loader:load_fmd(filename)
   print('Max grayscale: ' .. torch.max(grayscale_images))
   print('Min grayscale: ' .. torch.min(grayscale_images))
 
-  print('Max value: ' .. torch.max(all_images))
-
   print(sys.COLORS.red .. 'Loaded!')
   return grayscale_images
 end
